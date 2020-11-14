@@ -50,6 +50,7 @@ fn main() {
     let group_selector = Selector::parse("div.component-container.is-group").unwrap();
     let platform_selector =
         Selector::parse("div.child-components-container > div.component-inner-container").unwrap();
+    println!();
     for group in parsed.select(&group_selector) {
         let group_name = text_from_selector(&group, "span.name > span:nth-child(2)");
         if let Some(game) = matches.value_of("game") {
