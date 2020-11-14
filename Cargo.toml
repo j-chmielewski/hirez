@@ -1,0 +1,9 @@
+[package]
+authors = ["Jacek Chmielewski <jchmielewski@teonite.com>"]
+edition = "2018"
+name = "hirez"
+version = "0.1.0"
+
+[dependencies]
+reqwest = { version = "*", features = ["blocking"] }
+scraper = "*"
