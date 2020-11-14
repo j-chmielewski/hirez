@@ -1,6 +1,6 @@
 use scraper::{Html, Selector};
 use colored::*;
-
+use clap::{App, Arg};
 static URL: &str = "http://status.hirezstudios.com/";
 
 fn color_status(status: &str) -> ColoredString {
@@ -17,6 +17,14 @@ fn color_status(status: &str) -> ColoredString {
     }
 }
 fn main() {
+    let matches = App::new("hirez")
+        .author("Jacek Chmielewski <jchmielewski@teonite.com>")
+        .version(env!("CARGO_PKG_VERSION"))
+        .args(&[
+            Arg::with_name("game").help("If present, displays status for this game only.")
+        ])
+        .get_matches();
+    let game = matches.value_of("game");
     let document = reqwest::blocking::get(URL)
         .expect("Failed to fetch Hi-Rez status website.")
         .text()
@@ -28,6 +36,11 @@ fn main() {
     for group in parsed.select(&group_selector) {
         let _group_name = group.select(&group_name_selector).next().unwrap().inner_html();
         let group_name = _group_name.trim();
+        if let Some(game) = game {
+            if !group_name.to_lowercase().contains(&game.to_lowercase()) {
+                continue;
+            }
+        }
         let _status = group.select(&status_selector).next().unwrap().inner_html();
         let status = _status.trim();
         println!("{:20} {}", group_name, color_status(status));

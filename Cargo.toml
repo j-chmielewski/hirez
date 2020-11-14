@@ -4,6 +4,7 @@ edition = "2018"
 name = "hirez"
 version = "0.1.0"
 [dependencies]
+clap = "*"
 colored = "*"
 scraper = "*"
 
