@@ -57,7 +57,7 @@ fn main() {
             let status = _status.trim();
             println!("{:20} {}", group_name, color_status(status));
         } else {
-            println!("{}", group_name);
+            println!("{}\n", group_name);
             for platform in group.select(&platform_selector) {
                 let _platform_name = platform
                     .select(&platform_name_selector)
@@ -71,8 +71,9 @@ fn main() {
                     .unwrap()
                     .inner_html();
                 let platform_status = _platform_status.trim();
-                println!("\t{:20} {}", platform_name, color_status(platform_status));
+                println!("  {:20} {}", platform_name, color_status(platform_status));
             }
+            println!("\n");
         }
     }
 }
