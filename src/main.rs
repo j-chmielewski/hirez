@@ -1,6 +1,6 @@
-use clap::{App, Arg};
+use clap::{App, Arg, ArgMatches};
 use colored::*;
-use scraper::{Html, Selector};
+use scraper::{ElementRef, Html, Selector};
 static URL: &str = "http://status.hirezstudios.com/";
 
 fn color_status(status: &str) -> ColoredString {
@@ -16,8 +16,9 @@ fn color_status(status: &str) -> ColoredString {
         status.bright_red()
     }
 }
-fn main() {
-    let matches = App::new("hirez")
+
+fn configure_clap<'a>() -> ArgMatches<'a> {
+    App::new("hirez")
         .author("Jacek Chmielewski <jchmielewski@teonite.com>")
         .version(env!("CARGO_PKG_VERSION"))
         .args(&[
@@ -27,53 +28,45 @@ fn main() {
                 .short("c")
                 .help("Compact mode, displays aggregated platforms."),
         ])
-        .get_matches();
+        .get_matches()
+}
+
+fn text_from_selector(element: &ElementRef, selector: &str) -> String {
+    let untrimmed = element
+        .select(&Selector::parse(selector).unwrap())
+        .next()
+        .unwrap()
+        .inner_html();
+    String::from(untrimmed.trim())
+}
+
+fn main() {
+    let matches = configure_clap();
     let document = reqwest::blocking::get(URL)
         .expect("Failed to fetch Hi-Rez status website.")
         .text()
         .unwrap();
     let parsed = Html::parse_document(&document);
     let group_selector = Selector::parse("div.component-container.is-group").unwrap();
-    let group_name_selector = Selector::parse("span.name > span:nth-child(2)").unwrap();
-    let status_selector = Selector::parse("span.component-status").unwrap();
     let platform_selector =
         Selector::parse("div.child-components-container > div.component-inner-container").unwrap();
-    let platform_name_selector = Selector::parse("span.name").unwrap();
-    let platform_status_selector = Selector::parse("span.component-status").unwrap();
     for group in parsed.select(&group_selector) {
-        let _group_name = group
-            .select(&group_name_selector)
-            .next()
-            .unwrap()
-            .inner_html();
-        let group_name = _group_name.trim();
+        let group_name = text_from_selector(&group, "span.name > span:nth-child(2)");
         if let Some(game) = matches.value_of("game") {
             if !group_name.to_lowercase().contains(&game.to_lowercase()) {
                 continue;
             }
         }
         if matches.is_present("compact") {
-            let _status = group.select(&status_selector).next().unwrap().inner_html();
-            let status = _status.trim();
-            println!("{:20} {}", group_name, color_status(status));
+            let status = text_from_selector(&group, "span.component-status");
+            println!("{:20} {}", group_name, color_status(&status));
         } else {
-            println!("{}\n", group_name);
             for platform in group.select(&platform_selector) {
-                let _platform_name = platform
-                    .select(&platform_name_selector)
-                    .next()
-                    .unwrap()
-                    .inner_html();
-                let platform_name = _platform_name.trim();
-                let _platform_status = platform
-                    .select(&platform_status_selector)
-                    .next()
-                    .unwrap()
-                    .inner_html();
-                let platform_status = _platform_status.trim();
-                println!("  {:20} {}", platform_name, color_status(platform_status));
+                let platform_name = text_from_selector(&platform, "span.name");
+                let platform_status = text_from_selector(&platform, "span.component-status");
+                println!("  {:20} {}", platform_name, color_status(&platform_status));
             }
-            println!("\n");
+            println!();
         }
     }
 }
