@@ -7,13 +7,13 @@ fn color_status(status: &str) -> ColoredString {
     // FIXME: can we use smart pattern-matching here?
     let status_lower = status.to_lowercase();
     if status_lower.contains("operational") {
-        status.bright_green()
+        status.bright_green().bold()
     } else if status_lower.contains("maintenance") {
-        status.bright_blue()
+        status.bright_blue().bold()
     } else if status_lower.contains("degraded") {
-        status.bright_yellow()
+        status.bright_yellow().bold()
     } else {
-        status.bright_red()
+        status.bright_red().bold()
     }
 }
 
