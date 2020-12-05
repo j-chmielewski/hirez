@@ -2,12 +2,13 @@
 authors = ["Jacek Chmielewski <jchmielewski@teonite.com>"]
 edition = "2018"
 name = "hirez"
-version = "0.1.0"
+version = "0.2.0"
 [dependencies]
-clap = "*"
-colored = "*"
-scraper = "*"
+anyhow = "1.0.34"
+clap = "2.33.3"
+colored = "2.0.0"
+scraper = "0.12.0"
 
 [dependencies.reqwest]
 features = ["blocking"]
-version = "*"
+version = "0.10.9"
